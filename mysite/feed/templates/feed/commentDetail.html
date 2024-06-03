@@ -1,0 +1,100 @@
+{% extends 'feed/base.html' %}
+
+{% block body %}
+    <br>
+    <div class="row">
+        <div class="col-md-3 offset-md-1">
+            <img src="{{ comment.post.image.url }}" class="card" width="100%">
+        </div>
+        <div class="col-md-6">
+            <h1>
+                <i>{{ comment.post.title }}</i>
+            </h1>
+            <a href="{% url 'user:profile' comment.post.user.username %}">
+                <div class="col-md-4">
+                    <div class="row">
+                        <img src="{{ comment.post.user.profile.image.url }}" width="30px" style="margin-right:5px;" />
+                        <h6>{{ comment.post.user.username }}</h6>
+                    </div>
+                </div>
+            </a>
+            <div class="row">
+                <div class="col-md-4">
+                    {% load tz %}
+                    {% timezone request.user.profile.timezone %}
+                    <h6>
+                        <i>{{ comment.post.datetime }}</i>
+                    </h6>
+                    {% endtimezone %}
+                </div>
+            </div>
+            <h2>
+                <i>{{ comment.post.content|truncatewords_html:20 }}</i>
+            </h2>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-md-1">
+            <input type="button" value="<" onClick="javascript:history.go(-1);" style="margin-left: 22px; background-color: Transparent; border: none;">
+            <a href="{% url 'feed:postDetail' comment.post.id %}" class="btn">^</a>
+        </div>
+        <div class="col-md-10">
+            <h2>
+                <b>{{ comment.title }}</b>
+            </h2>
+            <h4>
+                <b>{{ comment.content }}</b>
+            </h4>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-md-11 offset-md-1">
+            <h3>Replies:</h3>
+        </div>
+    </div>
+    {% for subComment in comment_list %}
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h2>{{ subComment.title }}</h2>
+                <a href="{% url 'user:profile' subComment.user.username %}">
+                    <div class="col-md-4">
+                        <div class="row">
+                            <img src="{{ subComment.user.profile.image.url }}" height="30px" style="margin-right:5px;" />
+                            <h6>{{ subComment.user.username }}</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 offset-md-2">
+                {% load tz %}
+                {% timezone request.user.profile.timezone %}
+                <h6>{{ comment.datetime }}</h6>
+                {% endtimezone %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 offset-md-2">
+                <h4>{{ subComment.content }}</h4>
+            </div>
+            <div class="col-md-3 offset-md-1">
+                <a href="{% url 'feed:createComment' %}?comment_id={{ subComment.id }}&post_id={{ comment.post.id }}&next={{ request.path }}" class="btn btn-success">Reply</a>
+                <a href="{% url 'feed:commentDetail' subComment.id %}" class='btn btn-info'>See Replies</a>
+                {% if subComment.user == request.user %}
+                    <a href="{% url 'feed:updateComment' subComment.id %}?next={{ request.path }}" class="btn btn-warning">Edit</a>
+                    <a href="{% url 'feed:deleteComment' subComment.id %}?next={{ request.path }}" class="btn btn-danger">Delete</a>
+                {% endif %}
+            </div>
+        </div>
+        <hr>
+    {% endfor %}
+    <div class="row">
+        <div class="col-md-2 offset-md-5">
+            <a href="{% url 'feed:createComment' %}?comment_id={{ comment.id }}&post_id={{ comment.post.id }}&next={{ request.path }}" class="btn btn-info">Add Reply</a>
+        </div>
+    </div>
+    <br>
+{% endblock %}

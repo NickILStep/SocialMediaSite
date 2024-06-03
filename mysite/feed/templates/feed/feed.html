@@ -1,0 +1,89 @@
+{% extends 'feed/base.html' %}
+
+{% block body %}
+    <br>
+    <div class="row">
+        <div class="col-md-8 offset-md-1">
+            <h1>My Feed:</h1>
+        </div>
+        <div class="col-md-3">
+            <form action="" method="GET">
+                <input type="search" name="post_content" value="{{ request.GET.post_content }}">
+                <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+            </form>
+            <div class="offset-md-2">
+                <a href="{% url 'feed:feed' %}" class="btn btn-secondary btn-sm">Clear Search</a>
+            </div>
+        </div>
+    </div>
+    {% for post in post_list %}
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <a href="{% url 'feed:postDetail' post.id %}">
+                    <h2>{{ post.title }}</h2>
+                </a>
+                <a href="{% url 'user:profile' post.user.username %}">
+                    <div class="col-md-4">
+                        <div class="row">
+                            <img src="{{ post.user.profile.image.url }}" height="30px" style="margin-right:5px;" />
+                            <h6>{{ post.user.username }}</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 offset-md-2">
+                <a href="{% url 'feed:postDetail' post.id %}">
+                    <img class="card" width="200px" src="{{ post.image.url }}" />
+                </a>
+            </div>
+            <div class="col-md-4">
+                <h4>{{ post.content|truncatewords_html:50 }}</h4>
+            </div>
+            <div class="col-md-3 offset-md-1">
+                <a href="{% url 'feed:postDetail' post.id %}" class="btn btn-primary">Expand</a>
+                {% if request.user.profile not in post.likes.all %}
+                    <a href="{% url 'feed:likePost' post.id %}?next={{ request.path }}" class="btn btn-success btn-sm">Like Post</a>
+                {% endif %}
+                {% if request.user.profile in post.likes.all %}
+                    <a href="{% url 'feed:unlikePost' post.id %}?next={{ request.path }}" class="btn btn-secondary btn-sm">Unlike Post</a>
+                {% endif %}
+                {% if post not in request.user.profile.savedPosts.all  %}
+                    <a href="{% url 'feed:savePost' post.id %}?next={{ request.path }}" class="btn btn-info btn-sm">Save Post</a>
+                {% endif %}
+                {% if post in request.user.profile.savedPosts.all %}
+                    <a href="{% url 'feed:unsavePost' post.id %}?next={{ request.path }}" class="btn btn-secondary btn-sm">Unsave Post</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 offset-md-2">
+                {% load tz %}
+                {% timezone request.user.profile.timezone %}
+                <h6>{{ post.datetime }}</h6>
+                {% endtimezone %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 offset-md-2">
+                <h6>Likes: {{ post.likes.count }}</h6>
+            </div>
+        </div>
+        <hr>
+    {% endfor %}
+    <div class="row">
+        <div class="col-md-4 offset-md-5">
+            {% if post_list.has_previous %}
+                <a href="?page=1{% if request.GET.post_content is not None %}&post_content={{ request.GET.post_content }}{% endif %}" class="btn btn-info">First</a>
+                <a href="?page={{ post_list.previous_page_number }}{% if request.GET.post_content is not None %}&post_content={{ request.GET.post_content }}{% endif %}" class="btn btn-info">Previous</a>
+            {% endif %}
+            Page: {{ post_list.number }} of {{ post_list.paginator.num_pages }}
+            {% if post_list.has_next %}
+                <a href="?page={{ post_list.next_page_number }}{% if request.GET.post_content is not None %}&post_content={{ request.GET.post_content }}{% endif %}" class="btn btn-info">Next</a>
+                <a href="?page={{ post_list.paginator.num_pages }}{% if request.GET.post_content is not None %}&post_content={{ request.GET.post_content }}{% endif %}" class="btn btn-info">Last</a>
+            {% endif %}
+        </div>
+    </div>
+    <br>
+{% endblock %}

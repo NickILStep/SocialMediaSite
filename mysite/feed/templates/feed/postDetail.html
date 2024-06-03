@@ -1,0 +1,103 @@
+{% extends 'feed/base.html' %}
+
+{% block body %}
+    <br>
+    <div class="row">
+        <div class="col-md-1">
+            <a href="{% url 'feed:feed' %}" class="btn btn-info" style="margin-left: 20px;"><</a>
+        </div>
+        <div class="col-md-3">
+            <img src="{{ post.image.url }}" class="card" width="100%">
+        </div>
+        <div class="col-md-6">
+            <h1>{{ post.title }}</h1>
+            <a href="{% url 'user:profile' post.user.username %}">
+                <div class="col-md-4">
+                    <div class="row">
+                        <img src="{{ post.user.profile.image.url }}" width="30px" style="margin-right:5px;" />
+                        <h6>{{ post.user.username }}</h6>
+                    </div>
+                </div>
+            </a>
+            <div class="row">
+                <div class="col-md-4">
+                    {% load tz %}
+                    {% timezone request.user.profile.timezone %}
+                    <h6>{{ post.datetime }}</h6>
+                    {% endtimezone %}
+                </div>
+            </div>
+            <h2>{{ post.content }}</h2>
+        </div>
+        <div class="col-md-2">
+            {% if request.user.profile not in post.likes.all %}
+                <a href="{% url 'feed:likePost' post.id %}?next={{ request.path }}" class="btn btn-success">Like Post</a>
+            {% endif %}
+            {% if request.user.profile in post.likes.all %}
+                <a href="{% url 'feed:unlikePost' post.id %}?next={{ request.path }}" class="btn btn-secondary">Unlike Post</a>
+            {% endif %}
+            {% if post not in request.user.profile.savedPosts.all  %}
+                <a href="{% url 'feed:savePost' post.id %}?next={{ request.path }}" class="btn btn-info">Save Post</a>
+            {% endif %}
+            {% if post in request.user.profile.savedPosts.all %}
+                <a href="{% url 'feed:unsavePost' post.id %}?next={{ request.path }}" class="btn btn-secondary">Unsave Post</a>
+            {% endif %}
+            {% if post.user == request.user %}
+                <br>
+                <a href="{% url 'feed:updatePost' post.id %}?next={{ request.path }}" class="btn btn-warning btn-sm" style="margin-top: 5px;">Edit</a>
+                <a href="{% url 'feed:deletePost' post.id %}" class="btn btn-danger btn-sm" style="margin-top: 5px;">Delete</a>
+            {% endif %}
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-md-11 offset-md-1">
+            <h2>Comments:</h2>
+        </div>
+    </div>
+    <br>
+    {% for comment in comment_list %}
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h2>{{ comment.title }}</h2>
+                <a href="{% url 'user:profile' comment.user.username %}">
+                    <div class="col-md-4">
+                        <div class="row">
+                            <img src="{{ comment.user.profile.image.url }}" height="30px" style="margin-right:5px;" />
+                            <h6>{{ comment.user.username }}</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 offset-md-2">
+                {% load tz %}
+                {% timezone request.user.profile.timezone %}
+                <h6>{{ comment.datetime }}</h6>
+                {% endtimezone %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 offset-md-2">
+                <h4>{{ comment.content }}</h4>
+            </div>
+            <div class="col-md-3 offset-md-1">
+                <a href="{% url 'feed:createComment' %}?comment_id={{ comment.id }}&post_id={{ post.id }}&next={{ request.path }}" class="btn btn-success">Reply</a>
+                <a href="{% url 'feed:commentDetail' comment.id %}" class='btn btn-info'>See Replies</a>
+                {% if comment.user == request.user %}
+                    <br>
+                    <a href="{% url 'feed:updateComment' comment.id %}?next={{ request.path }}" class="btn btn-warning btn-sm" style="margin-top: 5px;">Edit</a>
+                    <a href="{% url 'feed:deleteComment' comment.id %}?next={{ request.path }}" class="btn btn-danger btn-sm" style="margin-top: 5px;">Delete</a>
+                {% endif %}
+            </div>
+        </div>
+        <hr>
+    {% endfor %}
+    <div class="row">
+        <div class="col-md-2 offset-md-5">
+            <a href="{% url 'feed:createComment' %}?post_id={{ post.id }}&next={{ request.path }}" class="btn btn-info">Add Comment</a>
+        </div>
+    </div>
+    <br>
+{% endblock %}

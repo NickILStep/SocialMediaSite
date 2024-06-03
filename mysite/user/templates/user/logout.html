@@ -1,0 +1,17 @@
+{% extends 'feed/base.html' %}
+
+{% block body %}
+    <br><br>
+    <div class="row">
+        <div class="col-md-6 offset-md-4">
+            <h1>You have been logged out!</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 offset-md-5">
+            <a href="{% url 'user:login' %}">
+                <h3>Back to login</h3>
+            </a>
+        </div>
+    </div>
+{% endblock %}
